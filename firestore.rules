@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 'global' 컬렉션의 문서들은 누구나 읽고 쓸 수 있음 (프로토타입 단계)
+    // 추후 Auth 연동 후 교사/학생 권한 분리 필요
+    match /global/{docId} {
+      allow read, write: if true;
+    }
+  }
+}
