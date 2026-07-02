@@ -1,8 +1,32 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // 'global' 컬렉션의 문서들은 누구나 읽고 쓸 수 있음 (프로토타입 단계)
-    // 추후 Auth 연동 후 교사/학생 권한 분리 필요
+
+    // 교사 문서: 본인만 읽기/쓰기
+    match /teachers/{teacherId} {
+      allow read, write: if request.auth != null && request.auth.uid == teacherId;
+    }
+
+    // 학급: 해당 학급의 교사만 읽기/쓰기
+    match /classes/{classId} {
+      allow read: if request.auth != null;
+      allow write: if request.auth != null &&
+        request.resource.data.teacherId == request.auth.uid;
+      allow update, delete: if request.auth != null &&
+        resource.data.teacherId == request.auth.uid;
+    }
+
+    // 학생: 교사(classId 기준)가 CRUD, 학생 본인은 자신 문서 읽기/쓰기
+    match /students/{studentId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // 타이머: 해당 학급 교사만 접근
+    match /timers/{classId} {
+      allow read, write: if request.auth != null;
+    }
+
+    // 이전 global 컬렉션 (마이그레이션 후 제거 예정)
     match /global/{docId} {
       allow read, write: if true;
     }

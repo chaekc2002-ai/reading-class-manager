@@ -1,0 +1,231 @@
+.landing-root {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: #0f0f1a;
+}
+
+/* Animated gradient blobs */
+.landing-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.bg-blob {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.35;
+  animation: blobFloat 8s ease-in-out infinite alternate;
+}
+
+.blob1 {
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, #7c3aed, #4f46e5);
+  top: -200px;
+  left: -200px;
+  animation-delay: 0s;
+}
+
+.blob2 {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, #ec4899, #f97316);
+  bottom: -200px;
+  right: -150px;
+  animation-delay: 3s;
+}
+
+.blob3 {
+  width: 300px;
+  height: 300px;
+  background: radial-gradient(circle, #06b6d4, #3b82f6);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation-delay: 6s;
+}
+
+@keyframes blobFloat {
+  0% { transform: scale(1) translate(0, 0); }
+  100% { transform: scale(1.15) translate(30px, -20px); }
+}
+
+.blob3 {
+  animation: blobFloat3 8s ease-in-out infinite alternate;
+}
+@keyframes blobFloat3 {
+  0% { transform: translate(-50%, -50%) scale(1); }
+  100% { transform: translate(-50%, -50%) scale(1.2); }
+}
+
+/* Center Content */
+.landing-center {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3rem;
+  padding: 2rem;
+  width: 100%;
+  max-width: 760px;
+}
+
+/* Logo */
+.landing-logo {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.logo-icon-wrap {
+  width: 80px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  backdrop-filter: blur(8px);
+  margin-bottom: 0.5rem;
+}
+
+.landing-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: white;
+  background: linear-gradient(135deg, #fff 0%, #c4b5fd 50%, #f0abfc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -0.5px;
+}
+
+.landing-subtitle {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 1.1rem;
+}
+
+/* Role Cards */
+.role-cards {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  width: 100%;
+}
+
+.role-card {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(16px);
+  border-radius: 24px;
+  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease, border-color 0.3s ease;
+  color: white;
+}
+
+.role-card.elevated {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+}
+
+.role-card.teacher.elevated {
+  background: rgba(124, 58, 237, 0.2);
+  border-color: rgba(124, 58, 237, 0.5);
+}
+
+.role-card.student.elevated {
+  background: rgba(236, 72, 153, 0.2);
+  border-color: rgba(236, 72, 153, 0.5);
+}
+
+.role-card-icon {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.5rem;
+}
+
+.teacher-icon {
+  background: linear-gradient(135deg, #7c3aed, #4f46e5);
+  box-shadow: 0 8px 32px rgba(124, 58, 237, 0.4);
+}
+
+.student-icon {
+  background: linear-gradient(135deg, #ec4899, #f97316);
+  box-shadow: 0 8px 32px rgba(236, 72, 153, 0.4);
+}
+
+.role-card h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: white;
+}
+
+.role-card p {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.6);
+  line-height: 1.5;
+}
+
+.role-card-arrow {
+  font-size: 1.5rem;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 0.5rem;
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+.role-card.elevated .role-card-arrow {
+  transform: translateX(6px);
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.role-divider {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 0.9rem;
+  flex-shrink: 0;
+}
+
+.landing-footer {
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 0.85rem;
+}
+
+@media (max-width: 600px) {
+  .role-cards {
+    flex-direction: column;
+  }
+  .role-card {
+    width: 100%;
+  }
+  .role-divider {
+    flex-direction: row;
+  }
+  .landing-title {
+    font-size: 1.8rem;
+  }
+}
