@@ -229,7 +229,7 @@ function StudentHome({ studentSession, onLogout }) {
               <span className="confirm-sub">삭제하면 획득한 XP 50점도 함께 차감됩니다.</span>
             </p>
             <div className="confirm-actions">
-              <button className="btn-confirm-cancel" onClick={() => setDeleteConfirm(null)}>안지, 취소</button>
+              <button className="btn-confirm-cancel" onClick={() => setDeleteConfirm(null)}>아니요</button>
               <button className="btn-confirm-delete" onClick={confirmDelete}>네, 삭제합니다</button>
             </div>
           </div>

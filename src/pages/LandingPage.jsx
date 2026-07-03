@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { BookOpen, GraduationCap, Users } from 'lucide-react';
+import { teacherGuide, studentGuide } from '../data/userGuides';
 import './LandingPage.css';
 
 function LandingPage() {
@@ -10,6 +11,15 @@ function LandingPage() {
 
   const openPolicyModal = async (type) => {
     try {
+      if (type === 'guide_teacher') {
+        setModalContent({ isOpen: true, title: '이용 안내 (교사용)', text: teacherGuide });
+        return;
+      }
+      if (type === 'guide_student') {
+        setModalContent({ isOpen: true, title: '이용 안내 (학생용)', text: studentGuide });
+        return;
+      }
+
       const url = type === 'terms' ? '/TERMS_OF_SERVICE.md' : '/PRIVACY_POLICY.md';
       const title = type === 'terms' ? '이용약관' : '개인정보처리방침';
       const res = await fetch(url);
@@ -76,6 +86,10 @@ function LandingPage() {
 
         <div className="landing-footer">
           <div className="footer-links">
+            <button onClick={() => openPolicyModal('guide_teacher')} className="footer-link-btn">이용 안내 (교사)</button>
+            <span className="divider">|</span>
+            <button onClick={() => openPolicyModal('guide_student')} className="footer-link-btn">이용 안내 (학생)</button>
+            <span className="divider">|</span>
             <button onClick={() => openPolicyModal('terms')} className="footer-link-btn">이용약관</button>
             <span className="divider">|</span>
             <button onClick={() => openPolicyModal('privacy')} className="footer-link-btn">개인정보처리방침</button>
