@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult
 } from 'firebase/auth';
 import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db, googleProvider } from '../services/firebase';
@@ -18,6 +20,32 @@ function TeacherAuth() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  // 리다이렉트 결과 처리 (팝업 차단 시 사용된 리다이렉트)
+  useEffect(() => {
+    const checkRedirect = async () => {
+      try {
+        const result = await getRedirectResult(auth);
+        if (result) {
+          setLoading(true);
+          const teacherRef = doc(db, 'teachers', result.user.uid);
+          const snap = await getDoc(teacherRef);
+          if (!snap.exists()) {
+            await setDoc(teacherRef, {
+              name: result.user.displayName || '선생님',
+              email: result.user.email,
+              createdAt: new Date().toISOString(),
+            });
+          }
+          navigate('/teacher-dashboard');
+        }
+      } catch (err) {
+        console.error("Redirect Auth Error:", err);
+        setError('로그인 처리 중 오류가 발생했습니다. 다시 시도해 주세요.');
+      }
+    };
+    checkRedirect();
+  }, [navigate]);
 
   const saveTeacherProfile = async (user, displayName) => {
     const teacherRef = doc(db, 'teachers', user.uid);
@@ -71,8 +99,13 @@ function TeacherAuth() {
       navigate('/teacher-dashboard');
     } catch (err) {
       console.error("Google Auth Error:", err);
-      setError(getFriendlyError(err.code));
-      setLoading(false);
+      if (err.code === 'auth/popup-blocked') {
+        // 팝업이 차단된 경우, 리다이렉트 방식으로 자동 전환
+        await signInWithRedirect(auth, googleProvider);
+      } else {
+        setError(getFriendlyError(err.code) || '구글 로그인 중 오류가 발생했습니다.');
+        setLoading(false);
+      }
     }
   };
 
