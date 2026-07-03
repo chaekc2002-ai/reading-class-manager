@@ -62,6 +62,30 @@ function BookSearchModal({ isOpen, onClose, onSave }) {
     setStep('record');
   };
 
+  const handleClose = () => {
+    // 완전히 닫을 때 모든 상태 초기화
+    setStep('search');
+    setQuery('');
+    setResults([]);
+    setSelectedBook(null);
+    setReadTime('');
+    setReview('');
+    setSearchError('');
+    onClose();
+  };
+
+  const handleXButton = () => {
+    if (step === 'record') {
+      // 독서 기록 단계에서 X 누르면 검색 화면으로 돌아가기
+      setSelectedBook(null);
+      setReadTime('');
+      setReview('');
+      setStep('search');
+    } else {
+      handleClose();
+    }
+  };
+
   const handleSave = () => {
     onSave({
       ...selectedBook,
@@ -82,7 +106,7 @@ function BookSearchModal({ isOpen, onClose, onSave }) {
   return (
     <div className="modal-overlay animate-fade-in">
       <div className="modal-content">
-        <button className="btn-close" onClick={onClose}><X size={24} /></button>
+        <button className="btn-close" onClick={handleXButton}><X size={24} /></button>
         
         {step === 'search' && (
           <div className="step-search">
@@ -154,6 +178,9 @@ function BookSearchModal({ isOpen, onClose, onSave }) {
                 ></textarea>
               </div>
               <button className="btn-save" onClick={handleSave}>기록 저장하고 경험치 얻기! 🌟</button>
+              <button type="button" className="btn-back-to-search" onClick={() => { setStep('search'); setSelectedBook(null); setReadTime(''); setReview(''); }}>
+                ← 다른 책 검색하기
+              </button>
             </div>
           </div>
         )}
