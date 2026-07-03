@@ -5,7 +5,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import {
-  HelpCircle, PlusCircle, CheckCircle, BookOpen, ArrowLeft, Send, Trophy, Settings, Trash2
+  HelpCircle, PlusCircle, CheckCircle, BookOpen, ArrowLeft, Send, Trophy, Settings, Trash2, Edit2
 } from 'lucide-react';
 import './QuizHub.css';
 
@@ -18,10 +18,11 @@ function QuizHub({ studentSession }) {
   // --- Solve tab state ---
   const [quizzes, setQuizzes] = useState([]);
   const [quizLoading, setQuizLoading] = useState(true);
-  const [selectedQuiz, setSelectedQuiz] = useState(null);
+  const [selectedQuiz, setSelectedQuiz] = useState(null); // 풀 퀴즈
   const [userAnswer, setUserAnswer] = useState('');
   const [feedback, setFeedback] = useState(null); // 'correct' | 'incorrect'
   const [submitting, setSubmitting] = useState(false);
+  const [editingQuiz, setEditingQuiz] = useState(null); // 수정할 퀴즈
 
   // --- Create tab state ---
   const [myBooks, setMyBooks] = useState([]);
@@ -83,6 +84,34 @@ function QuizHub({ studentSession }) {
     } catch (e) {
       console.error(e);
       alert("삭제 중 오류가 발생했습니다.");
+    }
+  };
+
+  const handleUpdateQuiz = async () => {
+    if (!editingQuiz.question.trim()) {
+      alert("질문을 입력해주세요.");
+      return;
+    }
+    if (editingQuiz.type === '객관식' && editingQuiz.options.some(o => !o.trim())) {
+      alert("모든 보기를 입력해주세요.");
+      return;
+    }
+    try {
+      const updateData = {
+        question: editingQuiz.question.trim(),
+        answer: editingQuiz.answer
+      };
+      if (editingQuiz.type === '객관식') {
+        updateData.options = editingQuiz.options.map(o => o.trim());
+      }
+      
+      await updateDoc(doc(db, 'quizzes', editingQuiz.id), updateData);
+      setQuizzes(prev => prev.map(q => q.id === editingQuiz.id ? { ...q, ...updateData } : q));
+      setEditingQuiz(null);
+      alert("퀴즈가 성공적으로 수정되었습니다.");
+    } catch (e) {
+      console.error(e);
+      alert("수정 중 오류가 발생했습니다.");
     }
   };
 
@@ -439,9 +468,14 @@ function QuizHub({ studentSession }) {
                       <span className={`quiz-type-badge type-${quiz.type}`}>{quiz.type}</span>
                       <h4 className="quiz-book-title">📖 {quiz.bookTitle}</h4>
                       <p className="quiz-card-author">도전한 친구: {(quiz.solvedBy || []).length}명</p>
-                      <button className="btn-solve" style={{ background: '#ef4444' }} onClick={(e) => { e.stopPropagation(); handleDeleteMyQuiz(quiz.id); }}>
-                        <Trash2 size={16} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> 삭제하기
-                      </button>
+                      <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
+                        <button className="btn-solve" style={{ background: '#3b82f6', flex: 1, padding: '8px' }} onClick={(e) => { e.stopPropagation(); setEditingQuiz(quiz); }}>
+                          <Edit2 size={16} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> 수정
+                        </button>
+                        <button className="btn-solve" style={{ background: '#ef4444', flex: 1, padding: '8px' }} onClick={(e) => { e.stopPropagation(); handleDeleteMyQuiz(quiz.id); }}>
+                          <Trash2 size={16} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> 삭제
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -513,9 +547,88 @@ function QuizHub({ studentSession }) {
                 </button>
               )}
             </div>
+            </div>
           </div>
         </div>
       )}
+
+      {/* ===== EDIT MODAL ===== */}
+      {editingQuiz && (
+        <div className="quiz-modal-overlay" onClick={e => { if (e.target === e.currentTarget) setEditingQuiz(null); }}>
+          <div className="quiz-modal edit-modal">
+            <h3 style={{ marginBottom: '16px', fontSize: '1.2rem', color: 'var(--text-main)' }}>퀴즈 수정하기</h3>
+            <div className="form-group" style={{ marginBottom: '16px', textAlign: 'left' }}>
+              <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>질문 수정</label>
+              <textarea
+                className="quiz-textarea"
+                style={{ width: '100%', minHeight: '80px', padding: '12px', borderRadius: '8px', border: '1px solid var(--border)' }}
+                value={editingQuiz.question}
+                onChange={e => setEditingQuiz({ ...editingQuiz, question: e.target.value })}
+              />
+            </div>
+            
+            {editingQuiz.type === 'OX' && (
+              <div className="form-group" style={{ marginBottom: '16px', textAlign: 'left' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>정답 수정</label>
+                <div className="ox-buttons" style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                  <button type="button" className={`btn-ox ${editingQuiz.answer === 'O' ? 'selected' : ''}`} onClick={() => setEditingQuiz({ ...editingQuiz, answer: 'O' })}>⭕ O</button>
+                  <button type="button" className={`btn-ox ${editingQuiz.answer === 'X' ? 'selected' : ''}`} onClick={() => setEditingQuiz({ ...editingQuiz, answer: 'X' })}>❌ X</button>
+                </div>
+              </div>
+            )}
+
+            {editingQuiz.type === '단답형' && (
+              <div className="form-group" style={{ marginBottom: '16px', textAlign: 'left' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>정답 수정</label>
+                <input
+                  type="text"
+                  className="short-answer-input"
+                  style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid var(--border)' }}
+                  value={editingQuiz.answer}
+                  onChange={e => setEditingQuiz({ ...editingQuiz, answer: e.target.value })}
+                />
+              </div>
+            )}
+
+            {editingQuiz.type === '객관식' && (
+              <div className="form-group" style={{ marginBottom: '16px', textAlign: 'left' }}>
+                <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>보기 및 정답 수정</label>
+                <div className="mcq-options">
+                  {editingQuiz.options.map((opt, i) => (
+                    <div className="mcq-option-row" key={i} style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                      <button
+                        type="button"
+                        className={`mcq-select-btn ${editingQuiz.answer === i ? 'selected' : ''}`}
+                        onClick={() => setEditingQuiz({ ...editingQuiz, answer: i })}
+                        style={{ padding: '8px 12px', minWidth: '40px', borderRadius: '8px', border: '1px solid var(--border)', background: editingQuiz.answer === i ? 'var(--primary)' : 'var(--surface)' }}
+                      >
+                        {editingQuiz.answer === i ? '✅' : `${i + 1}`}
+                      </button>
+                      <input
+                        type="text"
+                        className="mcq-option-input"
+                        style={{ flex: 1, padding: '8px', borderRadius: '8px', border: '1px solid var(--border)' }}
+                        value={opt}
+                        onChange={e => {
+                          const newOpts = [...editingQuiz.options];
+                          newOpts[i] = e.target.value;
+                          setEditingQuiz({ ...editingQuiz, options: newOpts });
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: '10px', marginTop: '20px' }}>
+              <button className="btn-cancel" onClick={() => setEditingQuiz(null)} style={{ flex: 1, padding: '12px', borderRadius: '8px', border: 'none', cursor: 'pointer', background: 'var(--surface)', color: 'var(--text-main)', fontWeight: 'bold' }}>취소</button>
+              <button className="btn-submit" style={{ flex: 1, background: '#10b981', color: 'white', padding: '12px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }} onClick={handleUpdateQuiz}>저장하기</button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
