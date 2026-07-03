@@ -126,17 +126,34 @@ function QuizHub({ studentSession }) {
 
   const handleCreateQuiz = async (e) => {
     e.preventDefault();
-    if (!selectedBook || !question.trim()) return;
-    if (quizType === '객관식' && (options.some(o => !o.trim()) || mcqAnswer === null)) return;
-    if (quizType !== '객관식' && !answer.trim()) return;
+    if (!selectedBook) {
+      alert("퀴즈를 낼 책을 선택해주세요.");
+      return;
+    }
+    if (!question.trim()) {
+      alert("질문을 작성해주세요.");
+      return;
+    }
+    if (quizType === '객관식' && options.some(o => !o.trim())) {
+      alert("모든 객관식 보기를 입력해주세요.");
+      return;
+    }
+    if (quizType === '객관식' && mcqAnswer === null) {
+      alert("객관식 정답 번호를 선택해주세요.");
+      return;
+    }
+    if (quizType !== '객관식' && !answer.trim()) {
+      alert("정답을 입력하거나 선택해주세요.");
+      return;
+    }
 
     setCreating(true);
     try {
       const quizData = {
-        classId,
-        authorId: studentId,
-        authorName: name,
-        bookTitle: selectedBook.title,
+        classId: classId || 'unknown',
+        authorId: studentId || 'unknown',
+        authorName: name || 'unknown',
+        bookTitle: selectedBook.title || '',
         bookCover: selectedBook.cover || '',
         type: quizType,
         question: question.trim(),
