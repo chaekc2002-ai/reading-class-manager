@@ -63,16 +63,15 @@ function TeacherAuth() {
   };
 
   const handleGoogle = async () => {
-    setError('');
-    setLoading(true);
     try {
       const cred = await signInWithPopup(auth, googleProvider);
+      setError('');
+      setLoading(true);
       await saveTeacherProfile(cred.user);
       navigate('/teacher-dashboard');
     } catch (err) {
       console.error("Google Auth Error:", err);
       setError(getFriendlyError(err.code));
-    } finally {
       setLoading(false);
     }
   };
@@ -86,6 +85,7 @@ function TeacherAuth() {
       'auth/invalid-email': '이메일 형식이 올바르지 않습니다.',
       'auth/invalid-credential': '이메일 또는 비밀번호가 올바르지 않습니다.',
       'auth/popup-closed-by-user': '로그인 창이 닫혔습니다.',
+      'auth/popup-blocked': '팝업이 차단되었습니다. 브라우저 주소창에서 팝업을 허용해 주세요.',
       'auth/operation-not-allowed': 'Google 로그인이 비활성화되어 있습니다. 관리자에게 문의하세요.',
     };
     return msgs[code] || `오류가 발생했습니다. 다시 시도해 주세요. (${code || '알 수 없는 오류'})`;
