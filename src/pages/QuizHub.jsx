@@ -547,7 +547,6 @@ function QuizHub({ studentSession }) {
                 </button>
               )}
             </div>
-            </div>
           </div>
         </div>
       )}
