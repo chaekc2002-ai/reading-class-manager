@@ -70,6 +70,7 @@ function TeacherAuth() {
       await saveTeacherProfile(cred.user);
       navigate('/teacher-dashboard');
     } catch (err) {
+      console.error("Google Auth Error:", err);
       setError(getFriendlyError(err.code));
     } finally {
       setLoading(false);
@@ -85,8 +86,9 @@ function TeacherAuth() {
       'auth/invalid-email': '이메일 형식이 올바르지 않습니다.',
       'auth/invalid-credential': '이메일 또는 비밀번호가 올바르지 않습니다.',
       'auth/popup-closed-by-user': '로그인 창이 닫혔습니다.',
+      'auth/operation-not-allowed': 'Google 로그인이 비활성화되어 있습니다. 관리자에게 문의하세요.',
     };
-    return msgs[code] || '오류가 발생했습니다. 다시 시도해 주세요.';
+    return msgs[code] || `오류가 발생했습니다. 다시 시도해 주세요. (${code || '알 수 없는 오류'})`;
   };
 
   return (
@@ -130,7 +132,7 @@ function TeacherAuth() {
 
         <div className="auth-divider"><span>또는</span></div>
 
-        <button className="btn-google" onClick={handleGoogle} disabled={loading}>
+        <button type="button" className="btn-google" onClick={handleGoogle} disabled={loading}>
           <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" width="20" />
           Google로 {tab === 'login' ? '로그인' : '가입'}하기
         </button>
