@@ -172,9 +172,16 @@ function StudentHome({ studentSession, onLogout }) {
                 <img src={b.cover} alt={b.title} className="book-card-cover" />
                 <div className="book-card-info">
                   <h4 className="book-card-title">{b.title}</h4>
+                  <p className="book-card-author">{b.author}</p>
                   <div className="book-meta">
                     <span className="meta-item"><Clock size={14} /> {b.readTime}분</span>
                   </div>
+                  {b.review && (
+                    <div className="book-review">
+                      <span className="review-label">📝 느낀 점</span>
+                      <p className="review-text">{b.review}</p>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

@@ -5,7 +5,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import {
-  Plus, Settings, Trash2, Edit2, Check, X, LogOut, RefreshCw, Users, BookOpen, Award, Hash
+  Plus, Settings, Trash2, Edit2, Check, X, LogOut, RefreshCw, Users, BookOpen, Award, Hash, Clock, ChevronDown
 } from 'lucide-react';
 import './TeacherDashboard.css';
 
@@ -30,6 +30,9 @@ function TeacherDashboard({ user, onLogout }) {
   const [editStudentId, setEditStudentId] = useState(null);
   const [editStudentName, setEditStudentName] = useState('');
   const [editStudentPin, setEditStudentPin] = useState('');
+
+  // Book review viewer
+  const [viewingStudent, setViewingStudent] = useState(null); // student object
 
   // Load classes
   const loadClasses = useCallback(async () => {
@@ -260,27 +263,29 @@ function TeacherDashboard({ user, onLogout }) {
                     <th>PIN</th>
                     <th>레벨</th>
                     <th>XP</th>
+                    <th>도서</th>
                     <th>관리</th>
                   </tr>
                 </thead>
                 <tbody>
                   {students.length === 0 ? (
-                    <tr><td colSpan={5} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>아직 학생이 없습니다.</td></tr>
+                    <tr><td colSpan={6} style={{ textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>아직 학생이 없습니다.</td></tr>
                   ) : students.map(s => (
-                    <tr key={s.id}>
+                    <tr key={s.id} className={viewingStudent?.id === s.id ? 'row-active' : ''} style={{ cursor: 'pointer' }} onClick={() => setViewingStudent(viewingStudent?.id === s.id ? null : s)}>
                       <td>
                         {editStudentId === s.id
-                          ? <input value={editStudentName} onChange={e => setEditStudentName(e.target.value)} className="edit-input" />
+                          ? <input value={editStudentName} onChange={e => setEditStudentName(e.target.value)} className="edit-input" onClick={e => e.stopPropagation()} />
                           : <strong>{s.name}</strong>}
                       </td>
                       <td>
                         {editStudentId === s.id
-                          ? <input value={editStudentPin} onChange={e => setEditStudentPin(e.target.value.replace(/\D/, '').slice(0, 4))} className="edit-input pin-input" maxLength={4} />
+                          ? <input value={editStudentPin} onChange={e => setEditStudentPin(e.target.value.replace(/\D/, '').slice(0, 4))} className="edit-input pin-input" maxLength={4} onClick={e => e.stopPropagation()} />
                           : <span className="pin-badge">{'•'.repeat(4)}</span>}
                       </td>
                       <td><span className="lv-badge">LV.{s.level || 1}</span></td>
                       <td>{s.xp || 0} XP</td>
-                      <td>
+                      <td><span className="book-count-badge">📚 {(s.books || []).length}권</span></td>
+                      <td onClick={e => e.stopPropagation()}>
                         {editStudentId === s.id ? (
                           <div style={{ display: 'flex', gap: '0.4rem' }}>
                             <button className="btn-icon-ok" onClick={() => handleUpdateStudent(s.id)}><Check size={14} /></button>
@@ -302,6 +307,40 @@ function TeacherDashboard({ user, onLogout }) {
                 </tbody>
               </table>
             </div>
+
+            {/* Student book review panel */}
+            {viewingStudent && (
+              <div className="book-review-panel">
+                <div className="review-panel-header">
+                  <h3>📚 {viewingStudent.name} 학생의 독서 기록</h3>
+                  <button className="btn-icon-cancel" onClick={() => setViewingStudent(null)}><X size={16} /></button>
+                </div>
+                {(!viewingStudent.books || viewingStudent.books.length === 0) ? (
+                  <p className="review-empty">아직 기록한 책이 없습니다.</p>
+                ) : (
+                  <div className="review-book-list">
+                    {viewingStudent.books.map((b, i) => (
+                      <div className="review-book-item" key={b.id || i}>
+                        <img src={b.cover} alt={b.title} className="review-book-cover" />
+                        <div className="review-book-info">
+                          <strong className="review-book-title">{b.title}</strong>
+                          <span className="review-book-author">{b.author}</span>
+                          <span className="review-book-meta"><Clock size={12} /> {b.readTime}분</span>
+                          {b.review ? (
+                            <div className="review-book-review">
+                              <span className="review-label">📝 느낀 점</span>
+                              <p>{b.review}</p>
+                            </div>
+                          ) : (
+                            <p className="review-no-review">감상문 없음</p>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
       </main>
