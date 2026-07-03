@@ -2,11 +2,7 @@ import React, { useState } from 'react';
 import { Search, X, BookOpen, Clock, PenTool } from 'lucide-react';
 import './BookSearchModal.css';
 
-const MOCK_BOOKS = [
-  { id: 1, title: '어린 왕자', author: '앙투안 드 생텍쥐페리', cover: 'https://via.placeholder.com/80x120?text=Book+1' },
-  { id: 2, title: '해리 포터와 마법사의 돌', author: 'J.K. 롤링', cover: 'https://via.placeholder.com/80x120?text=Book+2' },
-  { id: 3, title: '나미야 잡화점의 기적', author: '히가시노 게이고', cover: 'https://via.placeholder.com/80x120?text=Book+3' },
-];
+
 
 function BookSearchModal({ isOpen, onClose, onSave }) {
   const [step, setStep] = useState('search'); // 'search' | 'record'
@@ -17,37 +13,49 @@ function BookSearchModal({ isOpen, onClose, onSave }) {
   const [readTime, setReadTime] = useState('');
   const [review, setReview] = useState('');
 
-  const [results, setResults] = useState(MOCK_BOOKS);
+  const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [searchError, setSearchError] = useState('');
 
   if (!isOpen) return null;
 
   const handleSearch = async (e) => {
     e.preventDefault();
     if (!query.trim()) return;
-    
+
     setLoading(true);
+    setSearchError('');
+    setResults([]);
     try {
-      const response = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query)}&maxResults=5`);
+      const response = await fetch(`/api/search-books?query=${encodeURIComponent(query)}`);
       const data = await response.json();
-      
-      if (data.items) {
-        const parsed = data.items.map(item => ({
-          id: item.id,
-          title: item.volumeInfo.title || '제목 없음',
-          author: item.volumeInfo.authors ? item.volumeInfo.authors.join(', ') : '작자 미상',
-          cover: item.volumeInfo.imageLinks ? item.volumeInfo.imageLinks.thumbnail : 'https://via.placeholder.com/80x120?text=No+Cover',
+
+      if (!response.ok) {
+        setSearchError('검색 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.');
+        return;
+      }
+
+      if (data.items && data.items.length > 0) {
+        const parsed = data.items.map((item, idx) => ({
+          id: item.isbn || `book-${idx}`,
+          title: item.title.replace(/<[^>]+>/g, ''),
+          author: item.author.replace(/<[^>]+>/g, ''),
+          cover: item.image || 'https://via.placeholder.com/80x120?text=No+Cover',
+          publisher: item.publisher || '',
+          pubdate: item.pubdate || '',
         }));
         setResults(parsed);
       } else {
         setResults([]);
       }
     } catch (error) {
-      console.error("Failed to fetch books", error);
+      console.error('Failed to fetch books:', error);
+      setSearchError('네트워크 오류가 발생했습니다.');
     } finally {
       setLoading(false);
     }
   };
+
 
   const handleSelectBook = (book) => {
     setSelectedBook(book);
@@ -64,7 +72,7 @@ function BookSearchModal({ isOpen, onClose, onSave }) {
     // Reset and close
     setStep('search');
     setQuery('');
-    setResults(MOCK_BOOKS);
+    setResults([]);
     setSelectedBook(null);
     setReadTime('');
     setReview('');
@@ -94,8 +102,10 @@ function BookSearchModal({ isOpen, onClose, onSave }) {
               <p className="results-title">{query ? '검색 결과' : '추천 도서'}</p>
               {loading ? (
                 <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>검색 중...</div>
+              ) : searchError ? (
+                <div style={{ textAlign: 'center', padding: '2rem', color: '#ff6b6b' }}>{searchError}</div>
               ) : results.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>검색 결과가 없습니다.</div>
+                <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>{query ? '검색 결과가 없습니다.' : '책 제목을 검색해 보세요.'}</div>
               ) : (
                 <div className="book-list">
                   {results.map(book => (
