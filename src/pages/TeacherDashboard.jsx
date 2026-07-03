@@ -5,7 +5,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import {
-  Plus, Settings, Trash2, Edit2, Check, X, LogOut, RefreshCw, Users, BookOpen, Award, Hash, Clock, ChevronDown, HelpCircle
+  Plus, Settings, Trash2, Edit2, Check, X, LogOut, RefreshCw, Users, BookOpen, Award, Hash, Clock, ChevronDown, HelpCircle, Copy
 } from 'lucide-react';
 import './TeacherDashboard.css';
 
@@ -159,6 +159,12 @@ function TeacherDashboard({ user, onLogout }) {
     }
   };
 
+  const handleCopyCode = (e, code) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(code);
+    alert('학급 코드가 복사되었습니다: ' + code);
+  };
+
   const handleLogout = async () => {
     await onLogout();
     navigate('/');
@@ -243,8 +249,13 @@ function TeacherDashboard({ user, onLogout }) {
                 <div key={c.id} className={`class-card ${selectedClass?.id === c.id ? 'selected' : ''}`}
                   onClick={() => { setSelectedClass(c); setTab('students'); }}>
                   <h3>{c.className}</h3>
-                  <div className="class-code-display">
-                    <Hash size={14} /> {c.classCode}
+                  <div className="class-code-display" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(0,0,0,0.03)', padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--border-light)', marginTop: '10px' }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 'bold', letterSpacing: '1px', color: 'var(--text-primary)' }}>
+                      <Hash size={14} /> {c.classCode}
+                    </span>
+                    <button onClick={(e) => handleCopyCode(e, c.classCode)} title="코드 복사" style={{ padding: '4px', background: 'transparent', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px' }} onMouseOver={e => e.currentTarget.style.background = 'rgba(0,0,0,0.05)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
+                      <Copy size={14} />
+                    </button>
                   </div>
                   <p className="class-card-hint">클릭하여 학생 관리</p>
                 </div>
