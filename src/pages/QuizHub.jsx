@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-  collection, query, where, getDocs, addDoc, updateDoc, doc, arrayUnion, getDoc
+  collection, query, where, getDocs, addDoc, updateDoc, doc, arrayUnion, getDoc, deleteDoc
 } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import {
-  HelpCircle, PlusCircle, CheckCircle, BookOpen, ArrowLeft, Send, Trophy
+  HelpCircle, PlusCircle, CheckCircle, BookOpen, ArrowLeft, Send, Trophy, Settings, Trash2
 } from 'lucide-react';
 import './QuizHub.css';
 
@@ -71,8 +71,20 @@ function QuizHub({ studentSession }) {
 
   // 내가 만든 퀴즈 제외한 다른 학생 퀴즈
   const othersQuizzes = quizzes.filter(q => q.authorId !== studentId);
+  const myQuizzes = quizzes.filter(q => q.authorId === studentId);
   const solvedQuizzes = othersQuizzes.filter(q => (q.solvedBy || []).includes(studentId));
   const unsolvedQuizzes = othersQuizzes.filter(q => !(q.solvedBy || []).includes(studentId));
+
+  const handleDeleteMyQuiz = async (quizId) => {
+    if (!window.confirm("이 퀴즈를 정말 삭제하시겠습니까?")) return;
+    try {
+      await deleteDoc(doc(db, 'quizzes', quizId));
+      setQuizzes(prev => prev.filter(q => q.id !== quizId));
+    } catch (e) {
+      console.error(e);
+      alert("삭제 중 오류가 발생했습니다.");
+    }
+  };
 
   const handleOpenQuiz = (quiz) => {
     setSelectedQuiz(quiz);
@@ -182,6 +194,17 @@ function QuizHub({ studentSession }) {
       setMcqAnswer(null);
       setQuizType('OX');
       setTimeout(() => setCreateDone(false), 3000);
+
+      // XP +20 (students 문서 업데이트)
+      if (studentId) {
+        const studentSnap = await getDoc(doc(db, 'students', studentId));
+        if (studentSnap.exists()) {
+          const data = studentSnap.data();
+          const newXp = (data.xp || 0) + 20;
+          const newLevel = Math.floor(newXp / 500) + 1;
+          await updateDoc(doc(db, 'students', studentId), { xp: newXp, level: newLevel });
+        }
+      }
     } catch (e) { console.error(e); }
     finally { setCreating(false); }
   };
@@ -207,6 +230,9 @@ function QuizHub({ studentSession }) {
         </button>
         <button className={tab === 'create' ? 'active' : ''} onClick={() => setTab('create')}>
           <PlusCircle size={16} /> 퀴즈 출제하기
+        </button>
+        <button className={tab === 'manage' ? 'active' : ''} onClick={() => setTab('manage')}>
+          <Settings size={16} /> 나의 퀴즈 관리
         </button>
       </div>
 
@@ -388,6 +414,39 @@ function QuizHub({ studentSession }) {
                 </>
               )}
             </form>
+          )}
+        </div>
+      )}
+
+      {/* ===== MANAGE TAB ===== */}
+      {tab === 'manage' && (
+        <div className="tab-content">
+          {quizLoading ? (
+            <div className="empty-msg">퀴즈를 불러오는 중...</div>
+          ) : myQuizzes.length === 0 ? (
+            <div className="empty-msg">
+              <Settings size={40} />
+              <p>내가 출제한 퀴즈가 없습니다.</p>
+            </div>
+          ) : (
+            <div className="quiz-section">
+              <h3 className="quiz-section-title">🔧 나의 퀴즈 ({myQuizzes.length})</h3>
+              <div className="quiz-grid">
+                {myQuizzes.map(quiz => (
+                  <div className="quiz-card" key={quiz.id}>
+                    {quiz.bookCover && <img src={quiz.bookCover} alt="" className="quiz-card-cover" />}
+                    <div className="quiz-card-body">
+                      <span className={`quiz-type-badge type-${quiz.type}`}>{quiz.type}</span>
+                      <h4 className="quiz-book-title">📖 {quiz.bookTitle}</h4>
+                      <p className="quiz-card-author">도전한 친구: {(quiz.solvedBy || []).length}명</p>
+                      <button className="btn-solve" style={{ background: '#ef4444' }} onClick={(e) => { e.stopPropagation(); handleDeleteMyQuiz(quiz.id); }}>
+                        <Trash2 size={16} style={{ verticalAlign: 'middle', marginRight: '4px' }} /> 삭제하기
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           )}
         </div>
       )}

@@ -141,9 +141,22 @@ function TeacherDashboard({ user, onLogout }) {
 
   // Delete student
   const handleDeleteStudent = async (studentId) => {
-    if (!window.confirm('정말 삭제하시겠습니까?')) return;
-    await deleteDoc(doc(db, 'students', studentId));
-    setStudents(prev => prev.filter(s => s.id !== studentId));
+    if (!window.confirm("정말 이 학생을 삭제하시겠습니까?")) return;
+    try {
+      await deleteDoc(doc(db, 'students', studentId));
+      setStudents(prev => prev.filter(s => s.id !== studentId));
+    } catch (e) { console.error(e); }
+  };
+
+  const handleDeleteQuiz = async (quizId) => {
+    if (!window.confirm("이 퀴즈를 정말 삭제하시겠습니까?")) return;
+    try {
+      await deleteDoc(doc(db, 'quizzes', quizId));
+      setClassQuizzes(prev => prev.filter(q => q.id !== quizId));
+    } catch (e) {
+      console.error(e);
+      alert("삭제 중 오류가 발생했습니다.");
+    }
   };
 
   const handleLogout = async () => {
@@ -393,8 +406,11 @@ function TeacherDashboard({ user, onLogout }) {
                         <p className="tq-question">Q. {quiz.question}</p>
                         <p className="tq-answer">A. {quiz.answer}</p>
                       </div>
-                      <div className="tq-footer">
+                      <div className="tq-footer" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span>도전한 학생 수: <strong>{(quiz.solvedBy || []).length}명</strong></span>
+                        <button className="btn-icon-del" onClick={() => handleDeleteQuiz(quiz.id)} title="퀴즈 삭제">
+                          <Trash2 size={16} />
+                        </button>
                       </div>
                     </div>
                   ))}
