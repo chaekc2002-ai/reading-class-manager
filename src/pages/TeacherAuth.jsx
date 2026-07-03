@@ -37,6 +37,7 @@ function TeacherAuth() {
               createdAt: new Date().toISOString(),
             });
           }
+          navigate('/teacher-dashboard');
         }
       } catch (err) {
         console.error("Redirect Auth Error:", err);
@@ -65,6 +66,7 @@ function TeacherAuth() {
     try {
       const cred = await signInWithEmailAndPassword(auth, email, password);
       await saveTeacherProfile(cred.user);
+      navigate('/teacher-dashboard');
     } catch (err) {
       setError(getFriendlyError(err.code));
     } finally {
@@ -80,6 +82,7 @@ function TeacherAuth() {
     try {
       const cred = await createUserWithEmailAndPassword(auth, email, password);
       await saveTeacherProfile(cred.user, name);
+      navigate('/teacher-dashboard');
     } catch (err) {
       setError(getFriendlyError(err.code));
     } finally {
@@ -93,6 +96,7 @@ function TeacherAuth() {
       setError('');
       setLoading(true);
       await saveTeacherProfile(cred.user);
+      navigate('/teacher-dashboard');
     } catch (err) {
       console.error("Google Auth Error:", err);
       if (err.code === 'auth/popup-blocked') {
