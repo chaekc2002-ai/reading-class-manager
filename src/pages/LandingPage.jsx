@@ -60,7 +60,15 @@ function LandingPage() {
           </button>
         </div>
 
-        <p className="landing-footer">Reading Class Manager &copy; 2026</p>
+        <div className="landing-footer">
+          <div className="footer-links">
+            <a href="/TERMS_OF_SERVICE.md" target="_blank" rel="noopener noreferrer">이용약관</a>
+            <span className="divider">|</span>
+            <a href="/PRIVACY_POLICY.md" target="_blank" rel="noopener noreferrer">개인정보처리방침</a>
+          </div>
+          <p>개인정보책임자: 채관철 교사 (서울장위초등학교) | 문의: 02-942-1772</p>
+          <p>&copy; 2026 독서꾸믈. All rights reserved.</p>
+        </div>
       </div>
     </div>
   );

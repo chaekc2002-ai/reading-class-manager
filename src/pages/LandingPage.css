@@ -211,8 +211,36 @@
 }
 
 .landing-footer {
-  color: rgba(255, 255, 255, 0.25);
+  margin-top: 4rem;
+  text-align: center;
+  color: var(--text-muted);
   font-size: 0.85rem;
+  line-height: 1.6;
+}
+
+.landing-footer p {
+  margin: 0.3rem 0;
+}
+
+.footer-links {
+  margin-bottom: 0.75rem;
+}
+
+.footer-links a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+  transition: var(--transition);
+}
+
+.footer-links a:hover {
+  text-decoration: underline;
+  color: var(--primary-hover);
+}
+
+.footer-links .divider {
+  margin: 0 0.75rem;
+  color: var(--border);
 }
 
 @media (max-width: 600px) {
