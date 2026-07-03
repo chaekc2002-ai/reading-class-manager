@@ -410,6 +410,9 @@ function QuizHub({ studentSession }) {
                               {mcqAnswer === i ? '✅' : `${i + 1}`}
                             </button>
                             <input
+                              id={`mcq-option-${i}`}
+                              name={`mcq-option-${i}`}
+                              aria-label={`보기 ${i + 1}`}
                               className="mcq-option-input"
                               placeholder={`보기 ${i + 1}`}
                               value={opt}
@@ -428,6 +431,9 @@ function QuizHub({ studentSession }) {
 
                     {quizType === '단답형' && (
                       <input
+                        id="short-answer"
+                        name="short-answer"
+                        aria-label="단답형 정답"
                         className="short-answer-input"
                         placeholder="정답을 입력하세요"
                         value={answer}

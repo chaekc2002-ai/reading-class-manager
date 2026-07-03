@@ -145,17 +145,17 @@ function TeacherAuth() {
         <form onSubmit={tab === 'login' ? handleEmailLogin : handleEmailSignup} className="auth-form">
           {tab === 'signup' && (
             <div className="form-field">
-              <label>이름</label>
-              <input type="text" placeholder="홍길동" value={name} onChange={e => setName(e.target.value)} required />
+              <label htmlFor="auth-name">이름</label>
+              <input id="auth-name" name="name" type="text" placeholder="홍길동" value={name} onChange={e => setName(e.target.value)} required />
             </div>
           )}
           <div className="form-field">
-            <label>이메일</label>
-            <input type="email" placeholder="teacher@school.com" value={email} onChange={e => setEmail(e.target.value)} required />
+            <label htmlFor="auth-email">이메일</label>
+            <input id="auth-email" name="email" type="email" placeholder="teacher@school.com" value={email} onChange={e => setEmail(e.target.value)} required />
           </div>
           <div className="form-field">
-            <label>비밀번호</label>
-            <input type="password" placeholder={tab === 'signup' ? '6자 이상 입력' : '비밀번호 입력'} value={password} onChange={e => setPassword(e.target.value)} required />
+            <label htmlFor="auth-password">비밀번호</label>
+            <input id="auth-password" name="password" type="password" placeholder={tab === 'signup' ? '6자 이상 입력' : '비밀번호 입력'} value={password} onChange={e => setPassword(e.target.value)} required />
           </div>
           {error && <p className="auth-error">{error}</p>}
           <button type="submit" className="btn-auth-primary" disabled={loading}>

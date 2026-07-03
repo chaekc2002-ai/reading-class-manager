@@ -90,6 +90,9 @@ function StudentLogin({ onStudentLogin }) {
               <div className="student-input-wrap">
                 <Hash size={20} className="input-icon" />
                 <input
+                  id="classCode"
+                  name="classCode"
+                  aria-label="학급 코드"
                   type="text"
                   placeholder="학급 코드 (예: ABC123)"
                   value={classCode}
@@ -138,6 +141,9 @@ function StudentLogin({ onStudentLogin }) {
                 <div className="student-input-wrap" style={{ marginTop: '1rem' }}>
                   <Lock size={20} className="input-icon" />
                   <input
+                    id="pin"
+                    name="pin"
+                    aria-label="PIN 번호"
                     type="password"
                     inputMode="numeric"
                     placeholder="4자리 PIN 번호"
