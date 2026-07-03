@@ -101,7 +101,13 @@ function TeacherAuth() {
       console.error("Google Auth Error:", err);
       if (err.code === 'auth/popup-blocked') {
         // 팝업이 차단된 경우, 리다이렉트 방식으로 자동 전환
-        await signInWithRedirect(auth, googleProvider);
+        try {
+          await signInWithRedirect(auth, googleProvider);
+        } catch (redirectErr) {
+          console.error("Redirect Error:", redirectErr);
+          setError(getFriendlyError(redirectErr.code) || '리다이렉트 로그인 중 오류가 발생했습니다.');
+          setLoading(false);
+        }
       } else {
         setError(getFriendlyError(err.code) || '구글 로그인 중 오류가 발생했습니다.');
         setLoading(false);
@@ -120,6 +126,8 @@ function TeacherAuth() {
       'auth/popup-closed-by-user': '로그인 창이 닫혔습니다.',
       'auth/popup-blocked': '팝업이 차단되었습니다. 브라우저 주소창에서 팝업을 허용해 주세요.',
       'auth/operation-not-allowed': 'Google 로그인이 비활성화되어 있습니다. 관리자에게 문의하세요.',
+      'auth/unauthorized-domain': '현재 도메인이 Firebase 허용 목록에 없습니다. Vercel 기본 주소로 접속해 보세요.',
+      'auth/cancelled-popup-request': '진행 중인 로그인 요청이 취소되었습니다.',
     };
     return msgs[code] || `오류가 발생했습니다. 다시 시도해 주세요. (${code || '알 수 없는 오류'})`;
   };
