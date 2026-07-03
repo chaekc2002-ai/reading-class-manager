@@ -6,6 +6,20 @@ import './LandingPage.css';
 function LandingPage() {
   const navigate = useNavigate();
   const [hovered, setHovered] = useState(null);
+  const [modalContent, setModalContent] = useState({ isOpen: false, title: '', text: '' });
+
+  const openPolicyModal = async (type) => {
+    try {
+      const url = type === 'terms' ? '/TERMS_OF_SERVICE.md' : '/PRIVACY_POLICY.md';
+      const title = type === 'terms' ? '이용약관' : '개인정보처리방침';
+      const res = await fetch(url);
+      const text = await res.text();
+      setModalContent({ isOpen: true, title, text });
+    } catch (error) {
+      console.error(error);
+      setModalContent({ isOpen: true, title: '오류', text: '문서를 불러올 수 없습니다.' });
+    }
+  };
 
   return (
     <div className="landing-root">
@@ -21,7 +35,7 @@ function LandingPage() {
           <div className="logo-icon-wrap">
             <BookOpen size={40} strokeWidth={1.5} />
           </div>
-          <h1 className="landing-title">독서 클래스 매니저</h1>
+          <h1 className="landing-title">독서꾸믈</h1>
           <p className="landing-subtitle">교사와 학생이 함께 만들어 가는 독서 여정 📚</p>
         </div>
 
@@ -62,14 +76,28 @@ function LandingPage() {
 
         <div className="landing-footer">
           <div className="footer-links">
-            <a href="/TERMS_OF_SERVICE.md" target="_blank" rel="noopener noreferrer">이용약관</a>
+            <button onClick={() => openPolicyModal('terms')} className="footer-link-btn">이용약관</button>
             <span className="divider">|</span>
-            <a href="/PRIVACY_POLICY.md" target="_blank" rel="noopener noreferrer">개인정보처리방침</a>
+            <button onClick={() => openPolicyModal('privacy')} className="footer-link-btn">개인정보처리방침</button>
           </div>
           <p>개인정보책임자: 채관철 교사 (서울장위초등학교) | 문의: 02-942-1772</p>
           <p>&copy; 2026 독서꾸믈. All rights reserved.</p>
         </div>
       </div>
+
+      {modalContent.isOpen && (
+        <div className="policy-modal-overlay" onClick={() => setModalContent({ ...modalContent, isOpen: false })}>
+          <div className="policy-modal" onClick={e => e.stopPropagation()}>
+            <div className="policy-modal-header">
+              <h2>{modalContent.title}</h2>
+              <button className="policy-modal-close" onClick={() => setModalContent({ ...modalContent, isOpen: false })}>&times;</button>
+            </div>
+            <div className="policy-modal-body">
+              <pre>{modalContent.text}</pre>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

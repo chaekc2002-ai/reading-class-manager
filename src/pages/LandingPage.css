@@ -226,14 +226,19 @@
   margin-bottom: 0.75rem;
 }
 
-.footer-links a {
+.footer-link-btn {
+  background: none;
+  border: none;
   color: var(--primary);
-  text-decoration: none;
   font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.85rem;
   transition: var(--transition);
+  font-family: inherit;
 }
 
-.footer-links a:hover {
+.footer-link-btn:hover {
   text-decoration: underline;
   color: var(--primary-hover);
 }
@@ -241,6 +246,79 @@
 .footer-links .divider {
   margin: 0 0.75rem;
   color: var(--border);
+}
+
+/* ===== POLICY MODAL ===== */
+.policy-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px);
+  padding: 1rem;
+}
+
+.policy-modal {
+  background: var(--surface);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 600px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+  animation: modalFadeIn 0.2s ease-out;
+}
+
+.policy-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.policy-modal-header h2 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: var(--text-main);
+}
+
+.policy-modal-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.5rem;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.policy-modal-close:hover {
+  color: var(--text-main);
+}
+
+.policy-modal-body {
+  padding: 1.5rem;
+  overflow-y: auto;
+  text-align: left;
+}
+
+.policy-modal-body pre {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  margin: 0;
+  line-height: 1.6;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @media (max-width: 600px) {
