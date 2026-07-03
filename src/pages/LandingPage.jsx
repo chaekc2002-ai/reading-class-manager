@@ -66,7 +66,7 @@ function LandingPage() {
           </button>
 
           <div className="role-divider">
-            <span>또는</span>
+            <span></span>
           </div>
 
           <button
