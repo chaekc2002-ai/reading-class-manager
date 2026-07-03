@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { PlusCircle, Star, BookOpen, Clock, ChevronRight, LogOut, Play, Square } from 'lucide-react';
+import { PlusCircle, Star, BookOpen, Clock, ChevronRight, LogOut, Play, Square, Trash2 } from 'lucide-react';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import BookSearchModal from '../components/BookSearchModal';
@@ -15,6 +15,9 @@ function StudentHome({ studentSession, onLogout }) {
   const [level, setLevel] = useState(1);
   const [books, setBooks] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
+
+  // Delete confirm dialog
+  const [deleteConfirm, setDeleteConfirm] = useState(null); // { id, title }
 
   // Personal timer
   const [timerSeconds, setTimerSeconds] = useState(0);
@@ -79,6 +82,17 @@ function StudentHome({ studentSession, onLogout }) {
   const handleSaveBook = (bookData) => {
     setBooks(prev => [{ ...bookData, id: Date.now() }, ...prev]);
     setXp(prev => prev + 50);
+  };
+
+  const handleDeleteBook = (bookId) => {
+    const book = books.find(b => b.id === bookId);
+    setDeleteConfirm({ id: bookId, title: book?.title || '이 책' });
+  };
+
+  const confirmDelete = () => {
+    setBooks(prev => prev.filter(b => b.id !== deleteConfirm.id));
+    setXp(prev => Math.max(0, prev - 50)); // 삭제 시 XP 50 차감
+    setDeleteConfirm(null);
   };
 
   const handleLogout = () => {
@@ -171,7 +185,16 @@ function StudentHome({ studentSession, onLogout }) {
               <div className="book-card" key={b.id}>
                 <img src={b.cover} alt={b.title} className="book-card-cover" />
                 <div className="book-card-info">
-                  <h4 className="book-card-title">{b.title}</h4>
+                  <div className="book-card-header">
+                    <h4 className="book-card-title">{b.title}</h4>
+                    <button
+                      className="btn-delete-book"
+                      onClick={() => handleDeleteBook(b.id)}
+                      title="삭제"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  </div>
                   <p className="book-card-author">{b.author}</p>
                   <div className="book-meta">
                     <span className="meta-item"><Clock size={14} /> {b.readTime}분</span>
@@ -194,6 +217,24 @@ function StudentHome({ studentSession, onLogout }) {
         onClose={() => setIsModalOpen(false)}
         onSave={handleSaveBook}
       />
+
+      {/* Delete Confirm Dialog */}
+      {deleteConfirm && (
+        <div className="confirm-overlay">
+          <div className="confirm-dialog">
+            <div className="confirm-icon">🗑️</div>
+            <h3 className="confirm-title">독서 기록 삭제</h3>
+            <p className="confirm-message">
+              <strong>"{deleteConfirm.title}"</strong>을(를) 삭제할까요?<br />
+              <span className="confirm-sub">삭제하면 획득한 XP 50점도 함께 차감됩니다.</span>
+            </p>
+            <div className="confirm-actions">
+              <button className="btn-confirm-cancel" onClick={() => setDeleteConfirm(null)}>안지, 취소</button>
+              <button className="btn-confirm-delete" onClick={confirmDelete}>네, 삭제합니다</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
