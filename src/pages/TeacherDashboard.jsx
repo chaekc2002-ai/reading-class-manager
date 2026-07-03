@@ -5,7 +5,7 @@ import {
 } from 'firebase/firestore';
 import { db } from '../services/firebase';
 import {
-  Plus, Settings, Trash2, Edit2, Check, X, LogOut, RefreshCw, Users, BookOpen, Award, Hash, Clock, ChevronDown
+  Plus, Settings, Trash2, Edit2, Check, X, LogOut, RefreshCw, Users, BookOpen, Award, Hash, Clock, ChevronDown, HelpCircle
 } from 'lucide-react';
 import './TeacherDashboard.css';
 
@@ -34,6 +34,9 @@ function TeacherDashboard({ user, onLogout }) {
   // Book review viewer
   const [viewingStudent, setViewingStudent] = useState(null); // student object
 
+  // Quizzes
+  const [classQuizzes, setClassQuizzes] = useState([]);
+
   // Load classes
   const loadClasses = useCallback(async () => {
     if (!user) return;
@@ -58,8 +61,25 @@ function TeacherDashboard({ user, onLogout }) {
     } catch (e) { console.error(e); }
   }, [selectedClass]);
 
+  // Load quizzes for selected class
+  const loadQuizzes = useCallback(async () => {
+    if (!selectedClass) return;
+    try {
+      const q = query(collection(db, 'quizzes'), where('classId', '==', selectedClass.id));
+      const snap = await getDocs(q);
+      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      setClassQuizzes(list);
+    } catch (e) { console.error(e); }
+  }, [selectedClass]);
+
   useEffect(() => { loadClasses(); }, [user]);
-  useEffect(() => { if (selectedClass) loadStudents(); }, [selectedClass]);
+  useEffect(() => { 
+    if (selectedClass) {
+      loadStudents();
+      loadQuizzes();
+    }
+  }, [selectedClass]);
 
   // Create class
   const handleCreateClass = async (e) => {
@@ -146,6 +166,9 @@ function TeacherDashboard({ user, onLogout }) {
           </button>
           <button className={tab === 'students' ? 'active' : ''} onClick={() => setTab('students')} disabled={!selectedClass}>
             <Users size={18} /> 학생 관리
+          </button>
+          <button className={tab === 'quizzes' ? 'active' : ''} onClick={() => setTab('quizzes')} disabled={!selectedClass}>
+            <HelpCircle size={18} /> 퀴즈 현황
           </button>
         </nav>
 
@@ -341,6 +364,43 @@ function TeacherDashboard({ user, onLogout }) {
                 )}
               </div>
             )}
+          </div>
+        )}
+
+        {/* Quizzes Tab */}
+        {tab === 'quizzes' && selectedClass && (
+          <div className="dash-panel animate-fade-in">
+            <div className="students-header">
+              <div>
+                <h2 className="panel-title">🎯 {selectedClass.className} 퀴즈 현황</h2>
+              </div>
+            </div>
+            
+            <div className="class-quizzes-list">
+              {classQuizzes.length === 0 ? (
+                <p className="review-empty">아직 출제된 퀴즈가 없습니다.</p>
+              ) : (
+                <div className="teacher-quiz-grid">
+                  {classQuizzes.map(quiz => (
+                    <div className="teacher-quiz-card" key={quiz.id}>
+                      <div className="tq-header">
+                        <span className={`quiz-type-badge type-${quiz.type}`}>{quiz.type}</span>
+                        <span className="tq-date">{new Date(quiz.createdAt).toLocaleDateString()}</span>
+                      </div>
+                      <h4 className="tq-book-title">📖 {quiz.bookTitle}</h4>
+                      <p className="tq-author">출제자: <strong>{quiz.authorName}</strong></p>
+                      <div className="tq-content">
+                        <p className="tq-question">Q. {quiz.question}</p>
+                        <p className="tq-answer">A. {quiz.answer}</p>
+                      </div>
+                      <div className="tq-footer">
+                        <span>도전한 학생 수: <strong>{(quiz.solvedBy || []).length}명</strong></span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
       </main>

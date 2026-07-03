@@ -33,5 +33,14 @@ service cloud.firestore {
     match /global/{docId} {
       allow read, write: if true;
     }
+
+    // 퀴즈: 학생(비인증)도 조회/생성/업데이트 가능
+    match /quizzes/{quizId} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if true; // solvedBy 배열 업데이트 허용
+      allow delete: if request.auth != null ||
+        resource.data.authorId == request.auth.uid;
+    }
   }
 }
